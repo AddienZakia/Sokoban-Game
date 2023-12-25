@@ -2,16 +2,18 @@ import java.util.Scanner;
 
 public class App {
 
+    static void clear() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
     static void print(String[][] array) {
         for (int i = 0; i < array.length; i++) {
             for (int j = 0; j < array[0].length; j++) {
-                // if (i == 0 || j == 0 || (i + 1) % array.length == 0 || (j + 1) % array.length
-                // == 0)
-                // System.out.print("@ ");
-                // else
-                if (array[i][j] == null)
+                if (array[i][j] == null) {
+                    array[i][j] = "X";
                     System.out.print("X ");
-                else
+                } else
                     System.out.print(array[i][j] + " ");
             }
             System.out.println("");
@@ -39,11 +41,125 @@ public class App {
             obstaclePos[i][0] = posX;
             obstaclePos[i][1] = posY;
 
-            area[posX][posY] = String.valueOf(value);
+            area[posY][posX] = String.valueOf(value);
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    static char inputUser() {
+        Scanner data = new Scanner(System.in);
+        String res = data.nextLine();
+
+        return res.isEmpty() ? 'c' : res.toLowerCase().charAt(0);
+    }
+
+    static void printObstacleO(String[][] area, int[][] Opos) {
+        for (int[] x : Opos) {
+            String areaValue = area[x[0]][x[1]];
+            if (!areaValue.equals("*") && !areaValue.equals("#")) {
+                area[x[0]][x[1]] = "O";
+            }
+        }
+    }
+
+    static Boolean checkFinishObstacle(String[][] area, int[][] ObstacleOpos) {
+        int total = 0;
+        for (int[] x : ObstacleOpos) {
+            if (area[x[0]][x[1]].equals("#"))
+                total++;
+        }
+
+        return total == ObstacleOpos.length ? true : false;
+    }
+
+    static void controller(int level, String[][] area, int userXpos, int userYpos, int width, int height,
+            int[][] obstacleOpos) {
+
+        Boolean err = false;
+        while (true) {
+
+            System.out.println("Level " + level);
+            printObstacleO(area, obstacleOpos);
+            print(area);
+            if (err)
+                System.out.println("Kesalahan input");
+
+            System.out.print("Input : ");
+            char input = inputUser();
+
+            if (input == 'a') {
+                Boolean cekKotak = area[userYpos][userXpos > 0 ? userXpos - 1 : userXpos].equals("#");
+                if (userXpos == 0 || (userXpos == 1 && cekKotak)) {
+                    err = true;
+                } else {
+                    if (userXpos > 0 && cekKotak) {
+                        area[userYpos][userXpos - 2] = "#";
+                    }
+
+                    err = false;
+                    area[userYpos][userXpos] = "X";
+                    area[userYpos][--userXpos] = "*";
+                }
+            } else if (input == 's') {
+                Boolean cekKotak = area[userYpos < height - 1 ? userYpos + 1 : userYpos][userXpos].equals("#");
+                if (userYpos == width - 1 || (cekKotak && userYpos + 1 == width - 1)) {
+                    err = true;
+                } else {
+                    if (userYpos < height - 1 && cekKotak) {
+                        area[userYpos + 2][userXpos] = "#";
+                    }
+
+                    err = false;
+                    area[userYpos][userXpos] = "X";
+                    area[++userYpos][userXpos] = "*";
+                }
+            } else if (input == 'd') {
+                Boolean cekKotak = area[userYpos][userXpos < width - 1 ? userXpos + 1 : userXpos].equals("#");
+                if (userXpos > width - 1 || (cekKotak && userXpos + 1 == width - 1)) {
+                    err = true;
+                } else {
+                    if (userXpos < width - 1 && cekKotak) {
+                        area[userYpos][userXpos + 2] = "#";
+                    }
+
+                    err = false;
+                    area[userYpos][userXpos] = "X";
+                    area[userYpos][++userXpos] = "*";
+                }
+            } else if (input == 'w') {
+                Boolean cekKotak = area[userYpos > 0 ? userYpos - 1 : userYpos][userXpos].equals("#");
+                if (userYpos == 0 || (cekKotak && userYpos - 1 == 0)) {
+                    err = true;
+                } else {
+                    if (userYpos > 0 && cekKotak) {
+                        area[userYpos - 2][userXpos] = "#";
+                    }
+
+                    err = false;
+                    area[userYpos][userXpos] = "X";
+                    area[--userYpos][userXpos] = "*";
+                }
+            } else
+                err = true;
+
+            // Boolean finish = checkFinishObstacle(area, obstacleOpos);
+            // if (finish) {
+            // clear();
+            // // Upgrade level
+            // // create obstacle O and # pos
+            // // upgrade user pos
+
+            // print(area);
+
+            // System.out.println("We are finish");
+            // break;
+            // }
+
+            clear();
+        }
+
+    }
+
+    public static void main(String[] args) {
 
         // # = kotak, O = available, * = user, x = jalan, @ = border
         double level = 4;
@@ -52,26 +168,38 @@ public class App {
         int totalObstacle = (int) Math.ceil(level / 3);
         String[][] area = new String[width][height];
 
-        // Create random position obstacle;
+        // randomizenya masih error
+        // Create random obstacle X position
         randomPosObstacle(totalObstacle, width, area, '#');
 
-        // Create obstacle place
+        // Create reandom obstacle O position
         randomPosObstacle(totalObstacle, width, area, 'O');
+
+        // Get O Obstacle position
+        int obsPos = 0;
+        int[][] obstacleOpos = new int[totalObstacle][2];
+        for (int y = 0; y < width; y++) {
+            for (int x = 0; x < height; x++) {
+                if (area[y][x] != null && area[y][x].equals("O")) {
+                    obstacleOpos[obsPos][0] = y;
+                    obstacleOpos[obsPos][1] = x;
+                    obsPos++;
+                }
+            }
+        }
 
         // Create user position
         int userXpos = randomize(5, 0);
         int userYpos = randomize(5, 0);
 
-        while (area[userXpos][userYpos] != null) {
+        while (area[userYpos][userXpos] != null) {
             userXpos = randomize(5, 0);
             userYpos = randomize(5, 0);
         }
 
-        area[userXpos][userYpos] = "*";
+        area[userYpos][userXpos] = "*";
 
         // controller
-
-        // print
-        print(area);
+        controller((int) level, area, userXpos, userYpos, width, height, obstacleOpos);
     }
 }
