@@ -32,7 +32,7 @@ public class App {
 
             // check duplicaate
             for (int j = 0; j < totalObstacle; j++) {
-                if (obstaclePos[j][0] == posX && obstaclePos[j][1] == posY || area[posX][posY] != null) {
+                if (obstaclePos[j][0] == posX && obstaclePos[j][1] == posY || area[posY][posX] != null) {
                     posX = randomize(width - 2, 1);
                     posY = randomize(width - 2, 1);
                 }
@@ -112,7 +112,7 @@ public class App {
                 }
             } else if (input == 'd') {
                 Boolean cekKotak = area[userYpos][userXpos < width - 1 ? userXpos + 1 : userXpos].equals("#");
-                if (userXpos > width - 1 || (cekKotak && userXpos + 1 == width - 1)) {
+                if (userXpos == width - 1 || (cekKotak && userXpos + 1 == width - 1)) {
                     err = true;
                 } else {
                     if (userXpos < width - 1 && cekKotak) {
@@ -157,13 +157,12 @@ public class App {
     public static void main(String[] args) {
 
         // # = kotak, O = available, * = user, x = jalan, @ = border
-        int level = 1;
+        double level = 5;
         int width = 5, height = 5;
 
         int totalObstacle = (int) Math.ceil(level / 3);
         String[][] area = new String[width][height];
 
-        // randomizenya masih error
         // Create random obstacle X position
         randomPosObstacle(totalObstacle, width, area, '#');
 
