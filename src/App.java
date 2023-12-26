@@ -71,13 +71,11 @@ public class App {
         return total == ObstacleOpos.length ? true : false;
     }
 
-    static void controller(int level, String[][] area, int userXpos, int userYpos, int width, int height,
+    static void controller(String[][] area, int userXpos, int userYpos, int width, int height,
             int[][] obstacleOpos) {
 
         Boolean err = false;
         while (true) {
-
-            System.out.println("Level " + level);
             printObstacleO(area, obstacleOpos);
             print(area);
             if (err)
@@ -141,18 +139,15 @@ public class App {
             } else
                 err = true;
 
-            // Boolean finish = checkFinishObstacle(area, obstacleOpos);
-            // if (finish) {
-            // clear();
-            // // Upgrade level
-            // // create obstacle O and # pos
-            // // upgrade user pos
+            Boolean finish = checkFinishObstacle(area, obstacleOpos);
+            if (finish) {
+                clear();
 
-            // print(area);
+                print(area);
 
-            // System.out.println("We are finish");
-            // break;
-            // }
+                System.out.println("Finished");
+                break;
+            }
 
             clear();
         }
@@ -162,7 +157,7 @@ public class App {
     public static void main(String[] args) {
 
         // # = kotak, O = available, * = user, x = jalan, @ = border
-        double level = 4;
+        int level = 1;
         int width = 5, height = 5;
 
         int totalObstacle = (int) Math.ceil(level / 3);
@@ -189,17 +184,17 @@ public class App {
         }
 
         // Create user position
-        int userXpos = randomize(5, 0);
-        int userYpos = randomize(5, 0);
+        int userXpos = randomize(width, 0);
+        int userYpos = randomize(width, 0);
 
         while (area[userYpos][userXpos] != null) {
-            userXpos = randomize(5, 0);
-            userYpos = randomize(5, 0);
+            userXpos = randomize(width, 0);
+            userYpos = randomize(width, 0);
         }
 
         area[userYpos][userXpos] = "*";
 
         // controller
-        controller((int) level, area, userXpos, userYpos, width, height, obstacleOpos);
+        controller(area, userXpos, userYpos, width, height, obstacleOpos);
     }
 }
